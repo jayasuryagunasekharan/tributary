@@ -1,12 +1,11 @@
-import requests
+import requests as requests
 
-# Define the URL and the data
-url = "http://localhost:8000/record"
-data = {"engine_temperature": 0.3}
+url = "http://0.0.0.0:8000/record"
+data = {
+    "engine_temperature": 0.3,
+}
 
-# Send the POST request
-response = requests.post(url, json=data)
+response = requests.post(url=url, json=data)
 
-# Print the response
 print(response.status_code)
-print(response.json())
+print(response.content)
