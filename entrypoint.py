@@ -1,7 +1,7 @@
 # import dependencies
 import json
 import redis as redis
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from loguru import logger
 
 # define constants
@@ -30,11 +30,39 @@ def record_engine_temperature():
     engine_temperature_values = database.lrange(DATA_KEY, 0, -1)
     logger.info(f"engine temperature list now contains these values: {engine_temperature_values}")
 
+    if engine_temperature_values:
+        current_engine_temperature = float(engine_temperature_values[0])
+        average_engine_temperature = sum(map(float, engine_temperature_values)) / len(engine_temperature_values)
+    else:
+        current_engine_temperature = None
+        average_engine_temperature = None
+
     logger.info(f"record request successful")
-    return {"success": True}, 200
+    return jsonify({
+        "current_engine_temperature": current_engine_temperature,
+        "average_engine_temperature": average_engine_temperature
+    })
 
 
-# we'll implement this in the next step!
+# define an endpoint which accepts POST requests, and is reachable from the /collect endpoint
 @app.route('/collect', methods=['POST'])
 def collect_engine_temperature():
-    return {"success": True}, 200
+    database = redis.Redis(host="redis", port=6379, db=0, decode_responses=True)
+    engine_temperature_values = database.lrange(DATA_KEY, 0, -1)
+
+    if engine_temperature_values:
+        current_engine_temperature = float(engine_temperature_values[0])
+        average_engine_temperature = sum(map(float, engine_temperature_values)) / len(engine_temperature_values)
+    else:
+        current_engine_temperature = None
+        average_engine_temperature = None
+
+    return jsonify({
+        "current_engine_temperature": current_engine_temperature,
+        "average_engine_temperature": average_engine_temperature
+    })
+
+
+# start the Flask server
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000)

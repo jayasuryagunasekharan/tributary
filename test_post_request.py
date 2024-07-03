@@ -1,11 +1,14 @@
-import requests as requests
+import requests
 
-url = "http://0.0.0.0:8000/record"
-data = {
-    "engine_temperature": 0.3,
-}
+# Define the URLs
+record_url = "http://localhost:8000/record"
+collect_url = "http://localhost:8000/collect"
 
-response = requests.post(url=url, json=data)
+# Test the record endpoint
+record_data = {"engine_temperature": 5}
+response = requests.post(record_url, json=record_data)
+print("Record Response:", response.json())
 
-print(response.status_code)
-print(response.content)
+# Test the collect endpoint
+response = requests.post(collect_url)
+print("Collect Response:", response.json())
